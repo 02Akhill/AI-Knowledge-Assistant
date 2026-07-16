@@ -6,6 +6,7 @@ from backend.models import UploadResponse
 
 # File functions
 from backend.file_service import save_pdf, extract_text
+from backend.chunk_service import create_chunks
 
 
 # Create app
@@ -40,8 +41,19 @@ async def upload_pdfs(files: list[UploadFile] = File(...)):
             # Read text
             text = extract_text(pdf_path)
 
+            # Split into chunks
+            chunks = create_chunks(text)
+
             print(f"\n========== {file.filename} ==========")
-            print(text[:500])
+            print(f"Total Chunks : {len(chunks)}")
+
+            # Print first three chunks
+            for index, chunk in enumerate(chunks[:3], start=1):
+
+                print(f"\nChunk {index}")
+                print("-" * 40)
+                print(chunk[:300])
+
             print("=====================================\n")
 
             uploaded_files.append(file.filename)
