@@ -4,13 +4,9 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 # Response model
 from backend.models import UploadResponse
 
-# File service
-from backend.services.file_service import save_pdf, extract_text
-
-# Chunk service
-from backend.services.chunk_service import create_chunks
-
-# Gemini service
+# Services
+from backend.services.file_service import save_pdf
+from backend.services.document_service import process_document
 from backend.services.gemini_service import create_embeddings
 
 
@@ -21,15 +17,20 @@ app = FastAPI(
 )
 
 
+# ==========================================
 # Home Endpoint
+# ==========================================
 @app.get("/")
 def home():
+
     return {
         "message": "AI Knowledge Assistant is running."
     }
 
 
-# Upload Multiple PDFs
+# ==========================================
+# Upload PDFs
+# ==========================================
 @app.post("/upload", response_model=UploadResponse)
 async def upload_pdfs(files: list[UploadFile] = File(...)):
 
@@ -39,40 +40,46 @@ async def upload_pdfs(files: list[UploadFile] = File(...)):
 
         for file in files:
 
+            # -------------------------------
             # Save PDF
+            # -------------------------------
             pdf_path = await save_pdf(file)
 
-            # Extract text from PDF
-            text = extract_text(pdf_path)
+            # -------------------------------
+            # Process Document
+            # -------------------------------
+            document_chunks = process_document(
+                pdf_path=pdf_path,
+                document_name=file.filename
+            )
 
-            # Create chunks
-            chunks = create_chunks(text)
+            # -------------------------------
+            # Generate Embeddings
+            # -------------------------------
+            document_chunks = create_embeddings(document_chunks)
 
-            # Generate Gemini embeddings
-            embeddings = create_embeddings(chunks)
+            # -------------------------------
+            # Print Information
+            # -------------------------------
+            print(f"\n========== {file.filename} ==========")
+            print(f"Total Chunks : {len(document_chunks)}")
 
-            # Display information
-            print("\n" + "=" * 70)
-            print(f"File : {file.filename}")
-            print("=" * 70)
+            if document_chunks:
 
-            print(f"Total Chunks       : {len(chunks)}")
-            print(f"Total Embeddings   : {len(embeddings)}")
-
-            if len(embeddings) > 0:
                 print(
-                    f"Embedding Dimension : {len(embeddings[0].values)}"
+                    f"Embedding Dimension : "
+                    f"{len(document_chunks[0].embedding)}"
                 )
 
-            print("\nFirst Three Chunks")
+            # Print first 3 chunks
+            for chunk in document_chunks[:3]:
 
-            for index, chunk in enumerate(chunks[:3], start=1):
+                print(f"\nChunk {chunk.chunk_index}")
+                print(f"Page : {chunk.page_number}")
+                print("-" * 40)
+                print(chunk.text[:300])
 
-                print(f"\nChunk {index}")
-                print("-" * 50)
-                print(chunk[:300])
-
-            print("=" * 70)
+            print("\n=====================================\n")
 
             uploaded_files.append(file.filename)
 
