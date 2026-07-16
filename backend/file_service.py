@@ -1,30 +1,41 @@
-# Import Path for working with folders
+# Work with folders
 from pathlib import Path
 
-# Import UploadFile from FastAPI
+# FastAPI upload type
 from fastapi import UploadFile
 
-# Folder where uploaded files will be stored
-UPLOAD_FOLDER = Path("data")
-
-# Create the folder automatically if it doesn't exist
-UPLOAD_FOLDER.mkdir(exist_ok=True)
+# PDF library
+import fitz
 
 
-# Save uploaded PDF
+# Upload folder
+UPLOAD_FOLDER = Path("data/uploads")
+
+# Create folder automatically
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+
+
+# Save one PDF
 async def save_pdf(file: UploadFile) -> str:
-    # Allow only PDF files
-    if not file.filename.lower().endswith(".pdf"):
-        raise ValueError("Only PDF files are allowed.")
 
-    # Create complete file path
+    if not file.filename.lower().endswith(".pdf"):
+        raise ValueError(f"{file.filename} is not a PDF.")
+
     file_path = UPLOAD_FOLDER / file.filename
 
-    # Read uploaded file
-    content = await file.read()
+    file_path.write_bytes(await file.read())
 
-    # Save file to disk
-    file_path.write_bytes(content)
+    return str(file_path)
 
-    # Return saved filename
-    return file.filename
+
+# Extract text from one PDF
+def extract_text(pdf_path: str) -> str:
+
+    with fitz.open(pdf_path) as document:
+
+        text = ""
+
+        for page in document:
+            text += page.get_text()
+
+    return text.strip()

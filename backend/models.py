@@ -1,8 +1,9 @@
-# Import BaseModel for creating API response models
+# Import BaseModel for API responses
 from pydantic import BaseModel
 
 
-# Response returned after a successful upload
+# Response returned after uploading PDFs
 class UploadResponse(BaseModel):
     message: str
-    filename: str
+    files_uploaded: int
+    filenames: list[str]
