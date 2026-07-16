@@ -1,16 +1,15 @@
-# Virtual Environment
-.venv/
-
 # Python
 __pycache__/
 *.pyc
 
+# Virtual Environment
+.venv/
+
 # Environment Variables
 .env
 
-# IDE
+# VS Code
 .vscode/
 
-# OS Files
-.DS_Store
-Thumbs.db
+# Uploaded PDFs
+data/

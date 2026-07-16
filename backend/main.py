@@ -4,28 +4,32 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 # Response model
 from backend.models import UploadResponse
 
-# File functions
-from backend.file_service import save_pdf, extract_text
-from backend.chunk_service import create_chunks
+# File service
+from backend.services.file_service import save_pdf, extract_text
+
+# Chunk service
+from backend.services.chunk_service import create_chunks
+
+# Gemini service
+from backend.services.gemini_service import create_embeddings
 
 
-# Create app
+# Create FastAPI app
 app = FastAPI(
     title="AI Knowledge Assistant",
-    version="0.3"
+    version="0.5"
 )
 
 
-# Home endpoint
+# Home Endpoint
 @app.get("/")
 def home():
-
     return {
         "message": "AI Knowledge Assistant is running."
     }
 
 
-# Upload multiple PDFs
+# Upload Multiple PDFs
 @app.post("/upload", response_model=UploadResponse)
 async def upload_pdfs(files: list[UploadFile] = File(...)):
 
@@ -38,23 +42,37 @@ async def upload_pdfs(files: list[UploadFile] = File(...)):
             # Save PDF
             pdf_path = await save_pdf(file)
 
-            # Read text
+            # Extract text from PDF
             text = extract_text(pdf_path)
 
-            # Split into chunks
+            # Create chunks
             chunks = create_chunks(text)
 
-            print(f"\n========== {file.filename} ==========")
-            print(f"Total Chunks : {len(chunks)}")
+            # Generate Gemini embeddings
+            embeddings = create_embeddings(chunks)
 
-            # Print first three chunks
+            # Display information
+            print("\n" + "=" * 70)
+            print(f"File : {file.filename}")
+            print("=" * 70)
+
+            print(f"Total Chunks       : {len(chunks)}")
+            print(f"Total Embeddings   : {len(embeddings)}")
+
+            if len(embeddings) > 0:
+                print(
+                    f"Embedding Dimension : {len(embeddings[0].values)}"
+                )
+
+            print("\nFirst Three Chunks")
+
             for index, chunk in enumerate(chunks[:3], start=1):
 
                 print(f"\nChunk {index}")
-                print("-" * 40)
+                print("-" * 50)
                 print(chunk[:300])
 
-            print("=====================================\n")
+            print("=" * 70)
 
             uploaded_files.append(file.filename)
 
@@ -68,5 +86,12 @@ async def upload_pdfs(files: list[UploadFile] = File(...)):
 
         raise HTTPException(
             status_code=400,
+            detail=str(error)
+        )
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
             detail=str(error)
         )
