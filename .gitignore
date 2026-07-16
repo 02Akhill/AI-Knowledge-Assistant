@@ -13,3 +13,25 @@ __pycache__/
 
 # Uploaded PDFs
 data/
+
+# Virtual Environment
+.venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Environment Variables
+.env
+
+# Pytest
+.pytest_cache/
+
+# VS Code
+.vscode/
+
+# Uploaded PDFs
+data/uploads/
+
+# Chroma Database
+chroma_db/
