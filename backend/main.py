@@ -1,6 +1,10 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 
-from backend.models import UploadResponse
+from backend.models import (
+    UploadResponse,
+    ChatRequest,
+    ChatResponse,
+)
 
 from backend.services.file_service import save_pdf
 from backend.services.document_service import process_document
@@ -11,13 +15,14 @@ from backend.database.vector_store import vector_store
 
 app = FastAPI(
     title="AI Knowledge Assistant",
-    version="0.6"
+    version="0.7"
 )
 
 
 # ==========================================
 # Home Endpoint
 # ==========================================
+
 @app.get("/")
 def home():
     return {
@@ -28,6 +33,7 @@ def home():
 # ==========================================
 # Upload PDFs
 # ==========================================
+
 @app.post("/upload", response_model=UploadResponse)
 async def upload_pdfs(files: list[UploadFile] = File(...)):
 
@@ -108,3 +114,16 @@ async def upload_pdfs(files: list[UploadFile] = File(...)):
             status_code=500,
             detail=str(error)
         )
+
+
+# ==========================================
+# Chat Endpoint
+# ==========================================
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+
+    return ChatResponse(
+        answer="Chat endpoint is working. Semantic search will be implemented next.",
+        sources=[]
+    )
