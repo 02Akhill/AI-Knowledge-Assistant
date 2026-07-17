@@ -1,0 +1,20 @@
+$kind: http-request
+name: http://127.0.0.1:8000/upload
+description: ""
+url: http://127.0.0.1:8000/upload?=
+method: POST
+queryParams:
+  - key: ""
+    value: ""
+    disabled: false
+    description: ""
+body:
+  type: formdata
+  content:
+    - type: file
+      key: files
+      src:
+        - /C:/Users/akhil/Desktop/BCS503-model-set-1-paper-solution.pdf
+      description: TOC model paper 1 solution
+      disabled: false
+order: 1784300873453

@@ -10,6 +10,15 @@ def process_document(pdf_path: str, document_name: str) -> list[DocumentChunk]:
 
     pages = extract_pages(pdf_path)
 
+    # Debug information
+    print(f"Pages extracted: {len(pages)}")
+
+    for page in pages[:5]:
+        print(
+            f"Page {page.page_number} "
+            f"Characters: {len(page.text)}"
+        )
+
     document_chunks: list[DocumentChunk] = []
 
     chunk_index = 0
